@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>YoyoFlot Visualizer</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+  <script type="module" src="./main.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+  <style>
+    body { margin: 0; font-family: sans-serif; }
+    #map { height: 90vh; width: 100%; }
+    .topbar { padding: 10px; background: #fff; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <label>Пассажир:</label>
+    <select id="people"></select>
+    <button id="all-btn">Все маршруты</button>
+  </div>
+  <div id="map"></div>
+</body>
+</html>

@@ -1,7 +1,13 @@
 import json
 from pymongo import MongoClient
 
-client = MongoClient("mongodb://ds_user:StrongPassword123@185.22.67.9:27017/yoyoflot?authSource=yoyoflot")
+client = MongoClient(
+    host="185.22.67.9",
+    port=27017,
+    username="yoyoadmin",
+    password="YoyoFlotslzL6A8ekU",
+    authSource="yoyoflot",)
+
 db = client["yoyoflot"]
 
 
