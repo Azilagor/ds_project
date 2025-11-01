@@ -1,25 +1,126 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>YoyoFlot Visualizer</title>
-  <link rel="stylesheet" href="/static/styles.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
-  <script type="module" src="./main.js"></script>
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
-  <style>
-    body { margin: 0; font-family: sans-serif; }
-    #map { height: 90vh; width: 100%; }
-    .topbar { padding: 10px; background: #fff; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YoYoFlot Airlines — Analytical Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="topbar">
-    <label>Пассажир:</label>
-    <select id="people"></select>
-    <button id="all-btn">Все маршруты</button>
-  </div>
-  <div id="map"></div>
+    <div class="dashboard">
+        <!-- Header -->
+        <header class="header">
+            <h1>✈️ YoYoFlot Airlines — Analytical Dashboard</h1>
+        </header>
+
+        <!-- Main Container -->
+        <div class="main-container">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <h2>Filters</h2>
+                <div class="filter-group">
+                    <label for="airline-select">Airline</label>
+                    <select id="airline-select">
+                        <option value="">Select Airline</option>
+                        <option value="YoYoFlot">YoYoFlot</option>
+                        <option value="SkyWings">SkyWings</option>
+                        <option value="AeroVenture">AeroVenture</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="departure-select">Departure City</label>
+                    <select id="departure-select">
+                        <option value="">Select City</option>
+                        <option value="New York">New York</option>
+                        <option value="Los Angeles">Los Angeles</option>
+                        <option value="Chicago">Chicago</option>
+                        <option value="Miami">Miami</option>
+                    </select>
+                </div>
+
+                <button class="apply-btn" id="apply-filters">Apply Filters</button>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="content">
+                <!-- Flight Route Map Section -->
+                <section class="card">
+                    <h2>🌍 Flight Route Map</h2>
+                    <div class="map-placeholder">
+                        <p>Flight Route Map Placeholder</p>
+                    </div>
+                </section>
+
+                <!-- Top Passengers Section -->
+                <section class="card">
+                    <h2>🧳 Top Passengers by Number of Flights</h2>
+                    <div class="chart-container">
+                        <div class="chart-row">
+                            <span class="passenger-label">John Smith</span>
+                            <div class="bar-wrapper">
+                                <div class="bar" style="--bar-value: 85%; --bar-color: #0d6efd;"></div>
+                            </div>
+                            <span class="bar-value">42 flights</span>
+                        </div>
+                        <div class="chart-row">
+                            <span class="passenger-label">Sarah Johnson</span>
+                            <div class="bar-wrapper">
+                                <div class="bar" style="--bar-value: 72%; --bar-color: #0d6efd;"></div>
+                            </div>
+                            <span class="bar-value">36 flights</span>
+                        </div>
+                        <div class="chart-row">
+                            <span class="passenger-label">Mike Davis</span>
+                            <div class="bar-wrapper">
+                                <div class="bar" style="--bar-value: 65%; --bar-color: #0d6efd;"></div>
+                            </div>
+                            <span class="bar-value">33 flights</span>
+                        </div>
+                        <div class="chart-row">
+                            <span class="passenger-label">Emma Wilson</span>
+                            <div class="bar-wrapper">
+                                <div class="bar" style="--bar-value: 58%; --bar-color: #0d6efd;"></div>
+                            </div>
+                            <span class="bar-value">29 flights</span>
+                        </div>
+                        <div class="chart-row">
+                            <span class="passenger-label">David Brown</span>
+                            <div class="bar-wrapper">
+                                <div class="bar" style="--bar-value: 45%; --bar-color: #0d6efd;"></div>
+                            </div>
+                            <span class="bar-value">23 flights</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Summary Statistics Section -->
+                <section class="stats-section">
+                    <h2>📊 Summary Statistics</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" data-target="142">0</div>
+                            <div class="stat-label">Total Flights</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" data-target="58">0</div>
+                            <div class="stat-label">Unique Passengers</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" data-target="2.45">0</div>
+                            <div class="stat-label">Average Flights per Passenger</div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2025 YoYoFlot Analytics</p>
+        </footer>
+    </div>
+
+    <script src='main.js'></script>
 </body>
 </html>
