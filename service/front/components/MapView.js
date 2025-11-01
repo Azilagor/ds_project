@@ -3,9 +3,14 @@ import "leaflet.heat";
 
 export default class MapView {
   constructor(mapContainerId) {
-    this.map = L.map(mapContainerId).setView([30, 20], 3);
+    this.map = L.map(mapContainerId, {
+      zoomControl: true,
+      worldCopyJump: true,
+    }).setView([45, 20], 3);
+
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 7,
+      maxZoom: 8,
+      attribution: "© OpenStreetMap",
     }).addTo(this.map);
 
     this.markers = [];
@@ -16,10 +21,8 @@ export default class MapView {
     this.markers = [];
   }
 
-  async plotFlights(flights, airportCoords) {
+  plotFlights(flights, airportCoords) {
     this.clear();
-
-    const lines = [];
     const heatPoints = [];
 
     flights.forEach(f => {
@@ -30,28 +33,20 @@ export default class MapView {
       const line = L.polyline([from, to], {
         color: "#0078ff",
         weight: 1.5,
-        opacity: 0.8
+        opacity: 0.7,
       }).addTo(this.map);
       this.markers.push(line);
 
-      // точки для heatmap
-      heatPoints.push(from);
-      heatPoints.push(to);
+      heatPoints.push(from, to);
     });
 
-    // Добавим тепловую карту
     if (heatPoints.length) {
       const heatLayer = L.heatLayer(heatPoints, {
-        radius: 15,
-        blur: 20,
-        maxZoom: 5
+        radius: 20,
+        blur: 25,
+        maxZoom: 6,
       }).addTo(this.map);
       this.markers.push(heatLayer);
-    }
-
-    if (flights.length) {
-      const firstRoute = airportCoords[flights[0].from_airport];
-      if (firstRoute) this.map.setView(firstRoute, 4);
     }
   }
 }
