@@ -1,5 +1,5 @@
-from datetime import datetime
 from pymongo import MongoClient
+from datetime import datetime
 
 client = MongoClient(
     host="185.22.67.9",
@@ -8,18 +8,15 @@ client = MongoClient(
     password="YoyoFlotslzL6A8ekU",
     authSource="yoyoflot",
 )
-
 db = client["yoyoflot"]
 
-
 def to_iso(date_str):
-    """Преобразует строку даты в ISO формат YYYY-MM-DD, если возможно."""
     if not date_str:
         return None
-    for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%d.%m.%Y"):
+    for fmt in ("%Y-%m-%d", "%d.%m.%Y", "%m/%d/%Y"):
         try:
             return datetime.strptime(date_str, fmt).strftime("%Y-%m-%d")
-        except ValueError:
+        except Exception:
             continue
     return None
 
@@ -31,8 +28,7 @@ for d in db["data_tab"].find():
         "passenger_first_name": d.get("FirstName"),
         "passenger_middle_name": d.get("MiddleName"),
         "passenger_last_name": d.get("LastName"),
-        "passenger_sex": (d.get("Sex").capitalize() if d.get("Sex") else None)
-                         if "Sex" in d else None,
+        "passenger_sex": None,
         "passenger_birth_date": to_iso(d.get("PaxBirthDate")),
         "passenger_document": None,
         "booking_code": None,
@@ -51,7 +47,6 @@ for d in db["data_tab"].find():
     }
     cleaned.append(data)
 
-# перезаписываем коллекцию
 db["normalized_tab"].drop()
 if cleaned:
     db["normalized_tab"].insert_many(cleaned)

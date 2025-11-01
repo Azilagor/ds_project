@@ -1,6 +1,5 @@
-
-from datetime import datetime
 from pymongo import MongoClient
+from datetime import datetime
 
 client = MongoClient(
     host="185.22.67.9",
@@ -9,59 +8,54 @@ client = MongoClient(
     password="YoyoFlotslzL6A8ekU",
     authSource="yoyoflot",
 )
-
 db = client["yoyoflot"]
 
-cleaned = []
-
 def to_iso(date_str):
-    """Преобразует строку даты в формат YYYY-MM-DD или возвращает None."""
+    """Преобразует дату в ISO формат YYYY-MM-DD"""
     if not date_str:
         return None
-    for fmt in ("%m/%d/%Y", "%Y-%m-%d", "%d.%m.%Y"):
+    for fmt in ("%Y-%m-%d", "%d.%m.%Y", "%m/%d/%Y"):
         try:
             return datetime.strptime(date_str, fmt).strftime("%Y-%m-%d")
-        except ValueError:
+        except Exception:
             continue
     return None
-
-UNNEEDED_FIELDS = {"arrow", "seatlabel", "title", "note", "operator"}
 
 cleaned = []
 
 for d in db["data_excel"].find():
-    # очищаем от мусорных полей
-    doc = {k: v for k, v in d.items() if k not in UNNEEDED_FIELDS}
+    # Разбор имени "Lidiya Zhdanova"
+    full_name = d.get("passenger") or ""
+    parts = full_name.split()
+    first_name = parts[0] if len(parts) > 0 else None
+    last_name = parts[1] if len(parts) > 1 else None
 
-    # создаём нормализованный объект
     data = {
         "source": "excel",
-        "passenger_first_name": d.get("PassengerFirstName"),
-        "passenger_middle_name": d.get("PassengerSecondName"),
-        "passenger_last_name": d.get("PassengerLastName"),
-        "passenger_sex": (d.get("PassengerSex").capitalize()
-                          if d.get("PassengerSex") else None),
-        "passenger_birth_date": to_iso(d.get("PassengerBirthDate")),
-        "passenger_document": d.get("PassengerDocument"),
-        "booking_code": d.get("BookingCode"),
-        "ticket_number": d.get("TicketNumber"),
-        "baggage": d.get("Baggage"),
-        "flight_date": to_iso(d.get("FlightDate")),
-        "flight_time": d.get("FlightTime"),
-        "flight_number": d.get("FlightNumber"),
-        "codeshare": d.get("CodeShare"),
-        "destination": d.get("Destination"),
-        "from_airport": d.get("from") or None,
-        "to_airport": d.get("to") or None,
-        "seat_class": d.get("seatclass") or None,
-        "seat": d.get("seat") or None,
-        "ticket_type": d.get("tickettype") or None,
-        "sourcefile": d.get("sourcefile") or None,
+        "passenger_first_name": first_name,
+        "passenger_middle_name": None,
+        "passenger_last_name": last_name,
+        "passenger_sex": None,
+        "passenger_birth_date": None,
+        "passenger_document": None,
+        "booking_code": d.get("pnr"),
+        "ticket_number": d.get("ticketnumber"),
+        "baggage": None,
+        "flight_date": to_iso(d.get("date")),
+        "flight_time": d.get("time"),
+        "flight_number": d.get("flight"),
+        "codeshare": d.get("operator"),
+        "destination": d.get("to"),
+        "from_airport": d.get("from"),
+        "to_airport": d.get("to"),
+        "seat_class": d.get("seatclass"),
+        "seat": d.get("seat"),
+        "ticket_type": d.get("tickettype"),
+        "sourcefile": d.get("sourcefile"),
     }
 
     cleaned.append(data)
 
-# перезаписываем коллекцию
 db["normalized_excel"].drop()
 if cleaned:
     db["normalized_excel"].insert_many(cleaned)
