@@ -317,3 +317,29 @@ body {
     font-size: 1.25rem;
   }
 }
+
+.passenger-list {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fff;
+  padding: 8px;
+}
+
+.passenger-item {
+  padding: 8px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.passenger-item:hover {
+  background: #eef4ff;
+}
+
+.passenger-item.active {
+  background: #0d6efd;
+  color: white;
+}
+

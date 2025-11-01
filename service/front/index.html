@@ -1,126 +1,237 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YoYoFlot Airlines — Analytical Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <title>✈️ YoYoFlot Dashboard</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Карта слева */
+    #map {
+      flex: 2;
+      height: 100%;
+    }
+
+    /* Панель справа */
+    .sidebar {
+      flex: 1;
+      background-color: #ffffff;
+      border-left: 2px solid #eee;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    h1 {
+      margin-bottom: 1rem;
+      font-size: 1.4rem;
+      color: #0d6efd;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .passenger-list {
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      background: #fff;
+      padding: 8px;
+    }
+
+    .passenger-item {
+      padding: 8px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .passenger-item:hover {
+      background: #eef4ff;
+    }
+
+    .passenger-item.active {
+      background: #0d6efd;
+      color: white;
+    }
+
+    .stats {
+      margin-top: 1.5rem;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    .stat {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+      border: 1px solid #e3e3e3;
+    }
+
+    .stat b {
+      color: #0d6efd;
+      font-size: 1.3rem;
+    }
+    .passenger-select {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+    .selected {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;
+    cursor: pointer;
+    user-select: none;
+    font-weight: 500;
+    transition: background 0.2s;
+    }
+
+    .selected:hover {
+    background: #f3f6ff;
+    }
+
+    .passenger-list {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    z-index: 10;
+    transition: opacity 0.2s ease;
+    }
+
+    .passenger-list.hidden {
+    display: none;
+    }
+
+    .passenger-item {
+    padding: 8px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    }
+
+    .passenger-item:hover {
+    background: #eef4ff;
+    }
+  </style>
 </head>
+
 <body>
-    <div class="dashboard">
-        <!-- Header -->
-        <header class="header">
-            <h1>✈️ YoYoFlot Airlines — Analytical Dashboard</h1>
-        </header>
+  <div id="map"></div>
 
-        <!-- Main Container -->
-        <div class="main-container">
-            <!-- Sidebar -->
-            <aside class="sidebar">
-                <h2>Filters</h2>
-                <div class="filter-group">
-                    <label for="airline-select">Airline</label>
-                    <select id="airline-select">
-                        <option value="">Select Airline</option>
-                        <option value="YoYoFlot">YoYoFlot</option>
-                        <option value="SkyWings">SkyWings</option>
-                        <option value="AeroVenture">AeroVenture</option>
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label for="departure-select">Departure City</label>
-                    <select id="departure-select">
-                        <option value="">Select City</option>
-                        <option value="New York">New York</option>
-                        <option value="Los Angeles">Los Angeles</option>
-                        <option value="Chicago">Chicago</option>
-                        <option value="Miami">Miami</option>
-                    </select>
-                </div>
-
-                <button class="apply-btn" id="apply-filters">Apply Filters</button>
-            </aside>
-
-            <!-- Main Content -->
-            <main class="content">
-                <!-- Flight Route Map Section -->
-                <section class="card">
-                    <h2>🌍 Flight Route Map</h2>
-                    <div class="map-placeholder">
-                        <p>Flight Route Map Placeholder</p>
-                    </div>
-                </section>
-
-                <!-- Top Passengers Section -->
-                <section class="card">
-                    <h2>🧳 Top Passengers by Number of Flights</h2>
-                    <div class="chart-container">
-                        <div class="chart-row">
-                            <span class="passenger-label">John Smith</span>
-                            <div class="bar-wrapper">
-                                <div class="bar" style="--bar-value: 85%; --bar-color: #0d6efd;"></div>
-                            </div>
-                            <span class="bar-value">42 flights</span>
-                        </div>
-                        <div class="chart-row">
-                            <span class="passenger-label">Sarah Johnson</span>
-                            <div class="bar-wrapper">
-                                <div class="bar" style="--bar-value: 72%; --bar-color: #0d6efd;"></div>
-                            </div>
-                            <span class="bar-value">36 flights</span>
-                        </div>
-                        <div class="chart-row">
-                            <span class="passenger-label">Mike Davis</span>
-                            <div class="bar-wrapper">
-                                <div class="bar" style="--bar-value: 65%; --bar-color: #0d6efd;"></div>
-                            </div>
-                            <span class="bar-value">33 flights</span>
-                        </div>
-                        <div class="chart-row">
-                            <span class="passenger-label">Emma Wilson</span>
-                            <div class="bar-wrapper">
-                                <div class="bar" style="--bar-value: 58%; --bar-color: #0d6efd;"></div>
-                            </div>
-                            <span class="bar-value">29 flights</span>
-                        </div>
-                        <div class="chart-row">
-                            <span class="passenger-label">David Brown</span>
-                            <div class="bar-wrapper">
-                                <div class="bar" style="--bar-value: 45%; --bar-color: #0d6efd;"></div>
-                            </div>
-                            <span class="bar-value">23 flights</span>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Summary Statistics Section -->
-                <section class="stats-section">
-                    <h2>📊 Summary Statistics</h2>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-number" data-target="142">0</div>
-                            <div class="stat-label">Total Flights</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" data-target="58">0</div>
-                            <div class="stat-label">Unique Passengers</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number" data-target="2.45">0</div>
-                            <div class="stat-label">Average Flights per Passenger</div>
-                        </div>
-                    </div>
-                </section>
-            </main>
-        </div>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <p>&copy; 2025 YoYoFlot Analytics</p>
-        </footer>
+  <div class="sidebar">
+    <h1>✈️ YoYoFlot Dashboard</h1>
+    
+    <h2>👤 Passengers</h2>
+    <div id="passenger-select" class="passenger-select">
+    <div id="passenger-selected" class="selected">Select a passenger ▼</div>
+    <div id="passenger-list" class="passenger-list hidden">Loading...</div>
     </div>
 
-    <script src='main.js'></script>
+
+    <h2>📊 Statistics</h2>
+    <div class="stats">
+      <div class="stat"><b id="total-flights">0</b><br>Total Flights</div>
+      <div class="stat"><b id="unique-passengers">0</b><br>Unique Passengers</div>
+    </div>
+  </div>
+
+  <script>
+    const API = "http://localhost:8081/api";
+    const map = L.map("map").setView([55, 37], 4);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 8,
+      minZoom: 2
+    }).addTo(map);
+
+    const airportCoords = {
+      "SVO": [55.9726, 37.4146],
+      "OVB": [55.0126, 82.6507],
+      "CDG": [49.0097, 2.5479],
+      "BOS": [42.3656, -71.0096],
+      "PIT": [40.4914, -80.2329],
+      "VVO": [43.3980, 132.1484],
+      "REA": [46.4926, 2.5580],
+      "MOW": [55.7558, 37.6173],
+      "LED": [59.9390, 30.3158],
+    };
+
+    // загрузка пассажиров
+    async function loadPassengers() {
+  const res = await fetch(`${API}/passengers`);
+  const data = await res.json();
+  const list = document.getElementById("passenger-list");
+  list.innerHTML = "";
+
+  data.passengers.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "passenger-item";
+    div.textContent = `${p.first_name} ${p.last_name}`;
+    div.onclick = () => {
+      selectPassenger(p.document, div);
+      document.getElementById("passenger-selected").textContent = `${p.first_name} ${p.last_name} ▲`;
+      list.classList.add("hidden");
+    };
+    list.appendChild(div);
+  });
+
+  // открытие/закрытие списка
+  const selectedBox = document.getElementById("passenger-selected");
+  selectedBox.onclick = () => list.classList.toggle("hidden");
+}
+
+async function selectPassenger(document, el) {
+  const res = await fetch(`${API}/flights/${encodeURIComponent(document)}`);
+  const data = await res.json();
+
+  // очистить карту
+  map.eachLayer(l => {
+    if (l instanceof L.Polyline || l instanceof L.CircleMarker) map.removeLayer(l);
+  });
+
+  // нарисовать маршруты
+  data.flights.forEach(f => {
+    const from = airportCoords[f.from_airport];
+    const to = airportCoords[f.to_airport];
+    if (!from || !to) return;
+    L.polyline([from, to], { color: "#0d6efd", weight: 2 }).addTo(map);
+    L.circleMarker(from, { radius: 5, color: "green" }).addTo(map);
+    L.circleMarker(to, { radius: 5, color: "red" }).addTo(map);
+  });
+}
+
+
+    // загрузка статистики
+    async function loadStats() {
+      const res = await fetch(`${API}/stats`);
+      const data = await res.json();
+      document.getElementById("total-flights").textContent = data.total_flights;
+      document.getElementById("unique-passengers").textContent = data.total_passengers;
+    }
+
+    loadPassengers();
+    loadStats();
+  </script>
 </body>
 </html>

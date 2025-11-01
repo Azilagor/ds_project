@@ -1,37 +1,108 @@
-from flask import Flask, jsonify, request
-from db import get_db
+from fastapi import FastAPI, Query
+from fastapi.middleware.cors import CORSMiddleware
+from pymongo import MongoClient
+from datetime import datetime
 
-app = Flask(__name__)
-db = get_db()
-col = db["data_normalized"]
+# --- Подключение к Mongo ---
+client = MongoClient(
+    host="185.22.67.9",
+    port=27017,
+    username="yoyoadmin",
+    password="YoyoFlotslzL6A8ekU",
+    authSource="yoyoflot",
+)
+db = client["yoyoflot"]
+col_passengers = db["mart_passengers"]
+col_flights = db["data_unified"]
 
-@app.route("/people")
-def get_people():
-    """Список уникальных пассажиров"""
-    pipeline = [
-        {"$group": {"_id": {"first": "$first_name", "last": "$last_name"}}},
-        {"$match": {"_id.first": {"$ne": None}, "_id.last": {"$ne": None}}},
-        {"$limit": 100}
-    ]
-    people = [
-        {"first_name": p["_id"]["first"], "last_name": p["_id"]["last"]}
-        for p in col.aggregate(pipeline)
-    ]
-    return jsonify(people)
+# --- FastAPI app ---
+app = FastAPI(title="YoYoFlot Analytics API", version="1.0")
 
-@app.route("/flights")
-def get_flights():
-    """Все рейсы или только выбранного пассажира"""
-    first = request.args.get("first_name")
-    last = request.args.get("last_name")
+# --- CORS для фронта ---
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-    query = {}
-    if first and last:
-        query = {"first_name": first.upper(), "last_name": last.upper()}
+# --- Главная страница ---
+@app.get("/")
+def root():
+    return {
+        "status": "ok",
+        "service": "YoYoFlot Analytics API",
+        "time": datetime.utcnow(),
+    }
 
-    projection = {"_id": 0, "from_airport": 1, "to_airport": 1, "date": 1}
-    flights = list(col.find(query, projection))
-    return jsonify(flights)
+# --- Пассажиры ---
+@app.get("/api/passengers")
+def get_all_passengers(limit: int = 50):
+    """Получить список пассажиров (по умолчанию 50)"""
+    data = list(
+        col_passengers.find({}, {"_id": 0}).sort("last_name", 1).limit(limit)
+    )
+    return {"passengers": data, "count": len(data)}
 
+@app.get("/api/passengers/search")
+def search_passengers(query: str = Query(..., min_length=2)):
+    """Поиск пассажиров по имени, фамилии или документу"""
+    data = list(
+        col_passengers.find(
+            {"$text": {"$search": query}},
+            {"score": {"$meta": "textScore"}, "_id": 0}
+        ).sort([("score", {"$meta": "textScore"})]).limit(30)
+    )
+    return {"query": query, "results": data, "count": len(data)}
+
+@app.get("/api/passengers/{document}")
+def get_passenger(document: str):
+    """Получить данные конкретного пассажира по документу"""
+    p = col_passengers.find_one({"document": document}, {"_id": 0})
+    if not p:
+        return {"error": f"Passenger with document {document} not found"}
+    return p
+
+# --- Рейсы ---
+@app.get("/api/flights/{document}")
+def get_flights_by_passenger(document: str):
+    """Список рейсов по документу"""
+    flights = list(
+        col_flights.find(
+            {"passenger.document": document},
+            {"_id": 0, "flight": 1, "ticket": 1}
+        )
+    )
+    data = []
+    for f in flights:
+        flight = f.get("flight", {})
+        ticket = f.get("ticket", {})
+        flight.update({"ticket": ticket})
+        data.append(flight)
+    return {"document": document, "flights": data, "count": len(data)}
+
+# --- Статистика ---
+@app.get("/api/stats")
+def get_stats():
+    """Агрегированная статистика по пассажирам"""
+    total_passengers = col_passengers.count_documents({})
+    total_flights = db.data_unified.count_documents({})
+    avg_flights = round(total_flights / max(total_passengers, 1), 2)
+    most_active = list(
+        col_passengers.find({}, {"_id": 0})
+        .sort("total_flights", -1)
+        .limit(5)
+    )
+    return {
+        "total_passengers": total_passengers,
+        "total_flights": total_flights,
+        "avg_flights_per_passenger": avg_flights,
+        "top_passengers": most_active,
+        "generated_at": datetime.utcnow(),
+    }
+
+# --- Запуск ---
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8081, debug=True)
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8081, reload=True)
