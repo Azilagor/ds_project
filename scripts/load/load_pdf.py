@@ -2,7 +2,7 @@
 # import pdfplumber
 # from pymongo import MongoClient
 
-# client = MongoClient("mongodb://ds_user:StrongPassword123@185.22.67.9:27017/yoyoflot?authSource=yoyoflot")
+# client = MongoClient("mongodb://ds_user:@:27017/yoyoflot?authSource=yoyoflot")
 # db = client["yoyoflot"]
 
 # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -44,12 +44,12 @@ import re
 
 PDF_PATH = "Airlines/Skyteam_Timetable.pdf"
 reader = PdfReader(PDF_PATH)
-print(f"📄 Всего страниц: {len(reader.pages)}")
+print(f" Всего страниц: {len(reader.pages)}")
 
 def parse_pdf_preview(path, max_pages=10):
     reader = PdfReader(path)
     pages = min(len(reader.pages), max_pages)
-    print(f"📄 Всего страниц: {len(reader.pages)}. Покажем первые {pages}.")
+    print(f" Всего страниц: {len(reader.pages)}. Покажем первые {pages}.")
 
     for i in range(pages):
         text = reader.pages[i].extract_text() or ""

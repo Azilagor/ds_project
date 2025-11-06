@@ -5,10 +5,10 @@ from pymongo import MongoClient
 
 
 client = MongoClient(
-    host="185.22.67.9",
+    host="",
     port=27017,
     username="yoyoadmin",
-    password="YoyoFlotslzL6A8ekU",
+    password="Y,
     authSource="yoyoflot",)
 db = client["yoyoflot"]
 
@@ -21,11 +21,6 @@ DEFAULT_YAML = os.path.join(DATA_DIR, "SkyTeam-Exchange.yaml")  # поменяй
 TOPLEVEL_KEY_RE = re.compile(r"^(?P<key>(\"[^\"]+\"|'[^']+'|[^:\n#]+)):\s*$")
 
 def iter_top_blocks(yaml_path):
-    """
-    Итерируемся по верхнеуровневым блокам YAML (ключи без отступов),
-    буферим строки до следующего такого ключа и отдаём как отдельный YAML-фрагмент.
-    Это даёт потоковую обработку 'день за днём'.
-    """
     with open(yaml_path, "r", encoding="utf-8") as f:
         buf = []
         for line in f:
@@ -42,10 +37,6 @@ def iter_top_blocks(yaml_path):
             yield "".join(buf)
 
 def normalize_ff(ff_mapping):
-    """ FF:
-          'FB 520518073': {CLASS: Y, FARE: YRSTFN}
-        -> [{'program':'FB','number':'520518073','CLASS':'Y','FARE':'YRSTFN'}, ...]
-    """
     if not isinstance(ff_mapping, dict):
         return []
     items = []
@@ -62,13 +53,6 @@ def normalize_ff(ff_mapping):
     return items
 
 def to_doc(date_key, flight_no, details):
-    """
-    Превращаем один рейс в плоский документ для MongoDB.
-    details пример:
-      {
-        'FF': {...}, 'FROM':'SVO', 'TO':'CDG', 'STATUS':'LANDED'
-      }
-    """
     if details is None:
         details = {}
     ff_list = normalize_ff(details.get("FF"))

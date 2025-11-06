@@ -5,10 +5,10 @@ from datetime import datetime
 
 # --- Подключение к Mongo ---
 client = MongoClient(
-    host="185.22.67.9",
+    host="",
     port=27017,
     username="yoyoadmin",
-    password="YoyoFlotslzL6A8ekU",
+    password="Y,
     authSource="yoyoflot",
 )
 db = client["yoyoflot"]
@@ -64,23 +64,75 @@ def get_passenger(document: str):
         return {"error": f"Passenger with document {document} not found"}
     return p
 
-# --- Рейсы ---
-@app.get("/api/flights/{document}")
-def get_flights_by_passenger(document: str):
-    """Список рейсов по документу"""
-    flights = list(
-        col_flights.find(
-            {"passenger.document": document},
-            {"_id": 0, "flight": 1, "ticket": 1}
-        )
-    )
-    data = []
+
+
+
+@app.get("/api/spy")
+def find_spies(limit: int = 20):
+    pipeline = [
+        {"$match": {"passenger.document": {"$ne": None}}},
+        {
+            "$group": {
+                "_id": "$passenger.document",
+                "last_names": {"$addToSet": "$passenger.last_name"},
+                "first_names": {"$addToSet": "$passenger.first_name"},
+            }
+        },
+        # берём только тех, у кого фамилий больше одной
+        {"$match": {"last_names.1": {"$exists": True}}},
+        {
+            "$project": {
+                "_id": 0,
+                "document": "$_id",
+                "aliases": {
+                    "$map": {
+                        "input": {"$range": [0, {"$size": "$last_names"}]},
+                        "as": "idx",
+                        "in": {
+                            "$concat": [
+            { "$arrayElemAt": ["$first_names", {"$mod": ["$$idx", {"$size": "$first_names"}]}] },
+            " ",
+            { "$arrayElemAt": ["$first_names", {"$mod": ["$$idx", {"$size": "$first_names"}]}] }
+        ]
+                                }
+                    }
+                }
+            }
+        },
+        {"$limit": limit}
+    ]
+
+    spies = list(db.data_unified.aggregate(pipeline))
+    return {"spies": spies}
+
+
+
+@app.get("/api/flights/all")
+def get_all_flights():
+    flights = db.data_unified.find({}, {"_id": 0, "flight.from_airport": 1, "flight.to_airport": 1})
+    result = []
     for f in flights:
-        flight = f.get("flight", {})
-        ticket = f.get("ticket", {})
-        flight.update({"ticket": ticket})
-        data.append(flight)
-    return {"document": document, "flights": data, "count": len(data)}
+        fl = f.get("flight", {})
+        if fl.get("from_airport") and fl.get("to_airport"):
+            result.append({
+                "from_airport": fl["from_airport"].strip(),
+                "to_airport": fl["to_airport"].strip(),
+            })
+    return {"count": len(result), "flights": result}
+
+
+@app.get("/api/flights/{document}")
+def get_flights_by_document(document: str):
+    flights = list(db.data_unified.find(
+        {"passenger.document": document},
+        {"_id": 0, "flight": 1, "ticket": 1}
+    ))
+    return {
+        "document": document,
+        "flights": [f["flight"] for f in flights if f.get("flight")],
+        "count": len(flights)
+    }
+
 
 # --- Статистика ---
 @app.get("/api/stats")

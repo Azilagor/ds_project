@@ -15,7 +15,7 @@ df = df.loc[:, ~df.columns.str.contains('^Unnamed')]  # удалить Unnamed
 df = df.replace({pd.NA: None})            # заменить NaN -> None
 
 # --- 4. Подключаемся к MongoDB ---
-client = MongoClient("mongodb://ds_user:StrongPassword123@185.22.67.9:27017/yoyoflot?authSource=yoyoflot")
+client = MongoClient("mongodb://ds_user:@:27017/yoyoflot?authSource=yoyoflot")
 db = client["yoyoflot"]
 collection = db["boarding_passes"]
 
@@ -24,6 +24,6 @@ data = df.to_dict(orient="records")
 
 if data:
     collection.insert_many(data)
-    print(f"✅ Загружено {len(data)} записей из {len(all_sheets)} листов в {db.name}.{collection.name}")
+    print(f"Загружено {len(data)} записей из {len(all_sheets)} листов в {db.name}.{collection.name}")
 else:
-    print("⚠️ Нет данных для вставки")
+    print(" Нет данных для вставки")

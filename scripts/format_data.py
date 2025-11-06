@@ -1,14 +1,6 @@
 from pymongo import MongoClient
 from datetime import datetime
 
-# Подключение к MongoDB
-client = MongoClient(
-    host="185.22.67.9",
-    port=27017,
-    username="yoyoadmin",
-    password="YoyoFlotslzL6A8ekU",
-    authSource="yoyoflot",)
-
 
 db = client["yoyoflot"]
 

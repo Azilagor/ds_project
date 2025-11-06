@@ -2,7 +2,7 @@ import pdfplumber
 from pymongo import MongoClient
 
 # --- Подключение к MongoDB ---
-client = MongoClient("mongodb://ds_user:StrongPassword123@185.22.67.9:27017/yoyoflot?authSource=yoyoflot")
+client = MongoClient("mongodb://ds_user:@:27017/yoyoflot?authSource=yoyoflot")
 db = client["yoyoflot"]
 collection = db["timetable"]
 
@@ -96,6 +96,6 @@ with pdfplumber.open(PDF_PATH) as pdf:
 # --- Запись в MongoDB ---
 if docs:
     collection.insert_many(docs)
-    print(f"✅ Загружено {len(docs)} рейсов в timetable (part1)")
+    print(f" Загружено {len(docs)} рейсов в timetable (part1)")
 else:
-    print("⚠️ Ничего не найдено.")
+    print("Ничего не найдено.")

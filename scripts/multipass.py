@@ -4,13 +4,7 @@ import re
 from collections import defaultdict
 
 # Настройки подключения — подставь свои креды если нужно
-client = MongoClient(
-    host="185.22.67.9",
-    port=27017,
-    username="yoyoadmin",
-    password="YoyoFlotslzL6A8ekU",
-    authSource="yoyoflot",
-    )
+
 db = client["yoyoflot"]
 
 # Ключи, которые считаем именами

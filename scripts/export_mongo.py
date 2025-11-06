@@ -2,7 +2,7 @@ from pymongo import MongoClient
 import pandas as pd
 
 # Подключение
-client = MongoClient("mongodb://ds_user:StrongPassword123@185.22.67.9:27017/yoyoflot?authSource=yoyoflot")
+client = MongoClient("mongodb://ds_user:@:27017/yoyoflot?authSource=yoyoflot")
 db = client["yoyoflot"]
 col = db["timetable"]
 

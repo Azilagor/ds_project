@@ -2,10 +2,10 @@ from pymongo import MongoClient
 
 
 client = MongoClient(
-    host="185.22.67.9",
+    host="",
     port=27017,
     username="yoyoadmin",
-    password="YoyoFlotslzL6A8ekU",
+    password="Y,
     authSource="yoyoflot",)
 
 db = client["yoyoflot"]

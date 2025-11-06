@@ -9,7 +9,7 @@ from openpyxl import load_workbook
 from pymongo import MongoClient
 
 # 🔹 Подключение к MongoDB
-client = MongoClient("mongodb://ds_user:StrongPassword123@185.22.67.9:27017/yoyoflot?authSource=yoyoflot")
+client = MongoClient("mongodb://ds_user:@:27017/yoyoflot?authSource=yoyoflot")
 db = client["yoyoflot"]
 
 DATA_DIR = "Airlines"
